@@ -39,19 +39,21 @@ public class SequenceNumberTest {
         Assert.assertEquals(3, seqNum.next());
         Assert.assertEquals(4, seqNum.next());
 
-        seqNum = new SequenceNumber(0x7FFFFFFF);
-        Assert.assertEquals(0x7FFFFFFF, seqNum.next());
-        Assert.assertEquals(1, seqNum.next());  // wrap around
-        Assert.assertEquals(2, seqNum.next());
-        Assert.assertEquals(3, seqNum.next());
+        // This is the second initialization so it will have a range
+        // of [0x10000000, 0x20000000).
+        seqNum = new SequenceNumber(0xFFFFFFF);
+        Assert.assertEquals(0x1FFFFFFF, seqNum.next());
+        Assert.assertEquals(0x10000001, seqNum.next());  // wrap around
+        Assert.assertEquals(0x10000002, seqNum.next());
+        Assert.assertEquals(0x10000003, seqNum.next());
 
-        Assert.assertEquals(4, seqNum.peek());
+        Assert.assertEquals(0x10000004, seqNum.peek());
 
         seqNum.reset();
         
-        Assert.assertEquals(1, seqNum.peek());
-        Assert.assertEquals(1, seqNum.next());
-        Assert.assertEquals(2, seqNum.next());
-        Assert.assertEquals(3, seqNum.next());
+        Assert.assertEquals(0x10000001, seqNum.peek());
+        Assert.assertEquals(0x10000001, seqNum.next());
+        Assert.assertEquals(0x10000002, seqNum.next());
+        Assert.assertEquals(0x10000003, seqNum.next());
     }
 }
