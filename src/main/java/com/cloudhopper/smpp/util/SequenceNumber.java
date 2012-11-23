@@ -25,21 +25,42 @@ public class SequenceNumber {
     // AT&T Wireless uses a sequence number of 0 to start. This violates SMPP 3.4
     // specifications of the valid range of sequence numbers, but we'll need
     // to permit it.
-    public static final int MIN_VALUE = 0x00000000;
-    public static final int DEFAULT_VALUE = 0x00000001;
-    public static final int MAX_VALUE = 0x7FFFFFFF;
+    // Update: Removed the top nibble since the range of sequence numbers is 
+    //         prepended with the INSTANCE_INDEX (see below).
+    public static final int MIN_VALUE = 0x0000000;
+    public static final int DEFAULT_VALUE = 0x0000001;
+    public static final int MAX_VALUE = 0xFFFFFFF;
+
+    /*
+     * Handlers for multiple binds will have their own instance of SequenceNumber
+     * to generate sequence numbers of requests.  To be able to map back to 
+     * correct request for DRs, each instance of SequenceNumber will need to use
+     * a different range.  The instanceIndex will be used for the top nibble of
+     * the sequence number generated.  This ensures that each instance will
+     * generate a different set of sequence numbers (up to a maximum of 16 
+     * instances).
+     */
+    public static int instanceIndex = 0;
+    public int rangeNibble;
 
     private int value;
 
     public SequenceNumber() {
+        this.rangeNibble = instanceIndex;
         this.value = DEFAULT_VALUE;
+        instanceIndex++;
     }
 
     public SequenceNumber(int initialValue) throws InvalidSequenceNumberException {
+        this.rangeNibble = instanceIndex;
         assertValid(initialValue);
         this.value = initialValue;
+        instanceIndex++;
     }
 
+    public static int concatSeqNo(int upper, int lower) {
+        return ((upper % 16) << 28) + (lower % (MAX_VALUE+1));
+    }
     /**
      * Get the next number in this sequence's scheme. This method is synchronized
      * so its safe for multiple threads to call.
@@ -55,7 +76,7 @@ public class SequenceNumber {
             this.value++;
         }
 
-        return nextValue;
+        return concatSeqNo(this.rangeNibble, nextValue);
     }
 
     /**
@@ -66,7 +87,7 @@ public class SequenceNumber {
      * return the same number until a call to <code>next()</code> is made.
      */
     synchronized public int peek() {
-        return this.value;
+        return concatSeqNo(this.rangeNibble, this.value);
     }
 
     /**
