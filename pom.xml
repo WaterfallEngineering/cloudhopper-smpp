@@ -7,7 +7,7 @@
   <groupId>cloudhopper</groupId>
   <artifactId>ch-smpp</artifactId>
   <packaging>jar</packaging>
-  <version>4.1.2</version>
+  <version>4.1.2-wmpatch</version>
   <name>ch-smpp</name>
 
   <parent>
@@ -29,6 +29,47 @@
     I prefer jars managed out of the Cloudhopper Maven Repo with more consistent
     versioning.  I apologize for not using more common Maven repos
   -->
+	<distributionManagement>
+		<repository>
+			<id>nexus</id>
+			<name>Nexus</name>
+			<url>http://nexus.waterfall.com/content/repositories/thirdparty/</url>
+		</repository>
+	</distributionManagement>
+
+  <build>
+     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.10.4</version>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.0.1</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+    </plugin>
+    </plugins>
+</build>
+
   <dependencies>
     <!-- compile scope -->
     <dependency>
